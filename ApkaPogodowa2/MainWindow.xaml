@@ -7,16 +7,36 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="miasto" HorizontalAlignment="Left" Height="22" Margin="268,194,0,0" TextWrapping="Wrap" Text="Number of updates:" VerticalAlignment="Top" Width="198" TextChanged="TextBox_TextChanged2"/>
-        <Button x:Name="button" Content="Go" HorizontalAlignment="Left" Margin="524,195,0,0" VerticalAlignment="Top" Click="przycisk_Click" Height="22"/>
-        <ListView x:Name="Lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="268,237,257,34">
+        <Grid.Background>
+            <ImageBrush ImageSource="/back.jpg"/>
+        </Grid.Background>
+        <TextBox x:Name="numberOfUpdates" HorizontalAlignment="Left" Height="30" Margin="268,194,0,0" TextWrapping="Wrap" Text="Type city name here" VerticalAlignment="Top" Width="217" TextChanged="TextBox_TextChanged2" FontFamily="Microsoft Yi Baiti" FontSize="14" FontWeight="Bold" FontStyle="Normal" TextDecorations="{x:Null}"/>
+        <Button x:Name="button" Content="Go" HorizontalAlignment="Left" Margin="533,186,0,0" VerticalAlignment="Top" Click="przycisk_Click" Height="38" FontFamily="Microsoft Yi Baiti" FontSize="22" Width="38" FontWeight="Bold" BorderBrush="Black" FontStyle="Normal">
+            <Button.Background>
+                <RadialGradientBrush>
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="White" Offset="1"/>
+                    <GradientStop Color="#FF75BDFF"/>
+                </RadialGradientBrush>
+            </Button.Background>
+        </Button>
+        <ListView x:Name="Lista" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="151,222,151,10" SelectionChanged="Lista_SelectionChanged" SelectionMode="Extended" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.RowSpan="1" FontFamily="Microsoft YaHei UI Light">
             <ListView.View>
                 <GridView>
                     <GridViewColumn/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <TextBox x:Name="timeCounter" HorizontalAlignment="Left" Height="22" Margin="268,167,0,0" TextWrapping="Wrap" Text="Last update: " VerticalAlignment="Top" Width="198"/>
+        <TextBox x:Name="timeCounter" HorizontalAlignment="Left" Height="30" Margin="268,159,0,0" TextWrapping="Wrap" Text="Set the measurement time (minutes)" VerticalAlignment="Top" Width="217" TextChanged="timeCounter_TextChanged" FontFamily="Microsoft Yi Baiti" FontSize="14" FontStyle="Normal" FontWeight="Bold"/>
+        <Button x:Name="button_Add" Content="Add" HorizontalAlignment="Left" Margin="490,186,0,0" VerticalAlignment="Top" Click="przycisk_Click_Add" Height="38" FontFamily="Microsoft Yi Baiti" FontSize="22" Width="38" FontWeight="Bold" BorderBrush="Black" FontStyle="Normal">
+            <Button.Background>
+                <RadialGradientBrush>
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="White" Offset="1"/>
+                    <GradientStop Color="#FF75BDFF"/>
+                </RadialGradientBrush>
+            </Button.Background>
+        </Button>
 
     </Grid>
 </Window>

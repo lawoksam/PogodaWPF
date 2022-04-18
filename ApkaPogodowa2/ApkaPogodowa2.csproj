@@ -8,8 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="back.jpg" />
+    <None Remove="clouds-g4759a7eba_1920.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="6.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="back.jpg" />
+    <Resource Include="clouds-g4759a7eba_1920.jpg" />
   </ItemGroup>
 
 </Project>

@@ -116,12 +116,52 @@ namespace ApkaPogodowa2
         {
 
         }
-
+        int defTime = 2;
         private void przycisk_Click(object sender, RoutedEventArgs e)
         {
+            
+            if(timeCounter.Text != "Set the measurement time (minutes)")
+            {
+                try
+                {
+                    if (int.Parse(timeCounter.Text) < 10)
+                    { defTime = 1; }
+                    else
+                    { defTime = int.Parse(timeCounter.Text) / 10; }
+                    
+                }
+                catch (FormatException)
+                {
+
+                }
+            }
             Thread t = new Thread(() =>delayLoop());
             t.Start();
 
+        }
+
+
+        List<CityWeather> cityWeathersUpToDate = citiesListWeatherUpdate(); // public list of cities
+        bool isAddClicked = false;
+
+        private void przycisk_Click_Add(object sender, RoutedEventArgs e)
+        {
+            if (isAddClicked = false)
+            {
+                Lista.Items.Clear();
+                isAddClicked = true;
+            }
+            if(GetCityWeatherInfoFromAPI(numberOfUpdates.Text) != null)
+            {
+                
+                cityWeathersUpToDate.Add(GetCityWeatherInfo(numberOfUpdates.Text));
+                Lista.Items.Add(GetCityWeatherInfo(numberOfUpdates.Text).Name+"\t\t");
+            }
+            else
+            {
+                numberOfUpdates.Text = "Invalid city name";
+                
+            }
         }
         /// <summary>
         /// Checks weather every declared time
@@ -129,32 +169,27 @@ namespace ApkaPogodowa2
         private void delayLoop()
         {
             int i = 2;
-            //Lista.Items.Clear();
-            for (int z = 1; z <= 3; z++)
+            
+            for (int z = 1; z <= defTime; z++)
             {
-                Dispatcher.Invoke(() => miasto.Text = $"Number of updates: {z}");
+                Dispatcher.Invoke(() => Lista.Items.Clear());
+                Dispatcher.Invoke(() => numberOfUpdates.Text = $"Number of updates: {z} from {defTime}");
                 Dispatcher.Invoke(() => timeCounter.Text = $"Last update: {DateTime.Now.ToString("HH:mm")}");
-                List<CityWeather> cityWeathersUpToDate = citiesListWeatherUpdate();
                 i = CitiesToExcelLoop(i, cityWeathersUpToDate);
-                System.Threading.Thread.Sleep(6000);
+                System.Threading.Thread.Sleep(600000);
 
             }
+            Dispatcher.Invoke(() => numberOfUpdates.Text = "Finish"); // End of program
         }
 
         private void timerCounter(int i)
         {
-            miasto.Text = $"Pozostało {240 - i} minut";
+            numberOfUpdates.Text = $"Pozostało {240 - i} minut";
         }
 
         private static List<CityWeather> citiesListWeatherUpdate()
         {
             List<CityWeather> cityWeathers = new List<CityWeather>(); // Lista miast do pobierania pogody
-            cityWeathers.Add(GetCityWeatherInfo("Gdansk"));
-            cityWeathers.Add(GetCityWeatherInfo("Koscierzyna"));
-            cityWeathers.Add(GetCityWeatherInfo("Nowa Karczma"));
-            cityWeathers.Add(GetCityWeatherInfo("Stara kiszewa"));
-            cityWeathers.Add(GetCityWeatherInfo("Warszawa"));
-            cityWeathers.Add(GetCityWeatherInfo("Halle"));
             return cityWeathers;
         }
         #region Cities To Excel
@@ -170,7 +205,7 @@ namespace ApkaPogodowa2
                 }
                 else
                 {
-                    miasto.Text = "Niepoprawna nazwa miasta";
+                    numberOfUpdates.Text = "Niepoprawna nazwa miasta";
                 }
             }
 
@@ -179,13 +214,7 @@ namespace ApkaPogodowa2
 
         private void writeCityWeatherToFile(int i, CityWeather city)
         {
-            //miasto.Text = city.Name;
-            //Lista.Items.Add(("Temperatura w C: " + city.TempC));
-            //Lista.Items.Add(("Temperatura w F: " + city.TempF));
-            //Lista.Items.Add(("Zachmurzenie: " + city.CloudIness + "%"));
-            //Lista.Items.Add(("Wilgotność: " + city.Humidity + "%"));
-            //Lista.Items.Add(("Ciśnienie: " + city.Pressure + "kpa"));
-            //Lista.Items.Add(("Prędkość wiatru: " + city.WindSpeed + "km/h"));
+            cityTempToList(city);
 
             var file = new FileInfo(@"c:\c#\pogoda.xlsx");
             using (var package = new ExcelPackage(file))
@@ -203,6 +232,14 @@ namespace ApkaPogodowa2
                 package.Save();
             }
         }
+
+        private void cityTempToList(CityWeather city)
+        {
+            if (city.TempC < 0)
+            { Dispatcher.Invoke(() => Lista.Items.Add($"{city.TempC} degrees Celsius in {city.Name} \t\t")); }
+            else
+            { Dispatcher.Invoke(() => Lista.Items.Add($" {city.TempC} degrees Celsius in {city.Name} \t\t")); }
+        }
         #endregion
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -215,5 +252,22 @@ namespace ApkaPogodowa2
         {
 
         }
+
+        private void Lista_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void timeCounter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void button_Add_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        
     }
 }
