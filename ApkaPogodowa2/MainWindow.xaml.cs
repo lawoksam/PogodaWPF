@@ -1,4 +1,5 @@
 ﻿using ApkaPogodowa2.WeatherApi;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
@@ -31,7 +32,7 @@ namespace ApkaPogodowa2
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             InitializeComponent();
             isFileCreated();
-            var file = new FileInfo(@"c:\c#\pogoda.xlsx");
+            var file = new FileInfo(@"c:\WeatherApp\WeatherData\pogoda.xlsx");
             using (var package = new ExcelPackage(file))
             {
                 var sheet = package.Workbook.Worksheets.Add("Pogoda");
@@ -50,9 +51,9 @@ namespace ApkaPogodowa2
         /// </summary>
         private static void isFileCreated()
         {
-            if (File.Exists(@"c:\c#\pogoda.xlsx"))
+            if (File.Exists(@"c:\WeatherApp\WeatherData\pogoda.xlsx"))
             {
-                File.Delete(@"c:\c#\pogoda.xlsx");
+                File.Delete(@"c:\WeatherApp\WeatherData\pogoda.xlsx");
             }
         }
         #region GetCityWeatherInfoFromApi
@@ -116,11 +117,19 @@ namespace ApkaPogodowa2
         {
 
         }
-        int defTime = 2;
+        int defTime = 3; // default time ( 30 min )
         private void przycisk_Click(object sender, RoutedEventArgs e)
         {
-            
-            if(timeCounter.Text != "Set the measurement time (minutes)")
+            setMeasremetTime();
+            Thread t = new Thread(() => delayLoop());
+            t.Start();
+
+        }
+
+
+        private void setMeasremetTime()
+        {
+            if (timeCounter.Text != "Set the measurement time (minutes)")
             {
                 try
                 {
@@ -128,20 +137,15 @@ namespace ApkaPogodowa2
                     { defTime = 1; }
                     else
                     { defTime = int.Parse(timeCounter.Text) / 10; }
-                    
+
                 }
                 catch (FormatException)
                 {
-
                 }
             }
-            Thread t = new Thread(() =>delayLoop());
-            t.Start();
-
         }
 
-
-        List<CityWeather> cityWeathersUpToDate = citiesListWeatherUpdate(); // public list of cities
+        List<CityWeather> cityWeathersUpToDate = new List<CityWeather>(); // public list of cities
         bool isAddClicked = false;
 
         private void przycisk_Click_Add(object sender, RoutedEventArgs e)
@@ -155,7 +159,7 @@ namespace ApkaPogodowa2
             {
                 
                 cityWeathersUpToDate.Add(GetCityWeatherInfo(numberOfUpdates.Text));
-                Lista.Items.Add(GetCityWeatherInfo(numberOfUpdates.Text).Name+"\t\t");
+                Lista.Items.Add(GetCityWeatherInfo(numberOfUpdates.Text).Name+"\t\t\t\t");
             }
             else
             {
@@ -175,22 +179,26 @@ namespace ApkaPogodowa2
                 Dispatcher.Invoke(() => Lista.Items.Clear());
                 Dispatcher.Invoke(() => numberOfUpdates.Text = $"Number of updates: {z} from {defTime}");
                 Dispatcher.Invoke(() => timeCounter.Text = $"Last update: {DateTime.Now.ToString("HH:mm")}");
+                citiesListWeatherUpdate(cityWeathersUpToDate); // Update of weather
                 i = CitiesToExcelLoop(i, cityWeathersUpToDate);
-                System.Threading.Thread.Sleep(600000);
+                Thread.Sleep(600000);
 
             }
             Dispatcher.Invoke(() => numberOfUpdates.Text = "Finish"); // End of program
         }
 
-        private void timerCounter(int i)
+        /// <summary>
+        /// Update state of cities in List of objects
+        /// </summary>
+        /// <param name="cityWeathersPrev"></param>
+        /// <returns></returns>
+        private static List<CityWeather> citiesListWeatherUpdate(List<CityWeather> cityWeathersPrev)
         {
-            numberOfUpdates.Text = $"Pozostało {240 - i} minut";
-        }
-
-        private static List<CityWeather> citiesListWeatherUpdate()
-        {
-            List<CityWeather> cityWeathers = new List<CityWeather>(); // Lista miast do pobierania pogody
-            return cityWeathers;
+            for (int i = 0; i < cityWeathersPrev.Count; i++)
+            {
+                cityWeathersPrev[i] = GetCityWeatherInfo(cityWeathersPrev[i].Name);
+            } // Lista miast do pobierania pogody
+            return cityWeathersPrev;
         }
         #region Cities To Excel
         private int CitiesToExcelLoop(int i, List<CityWeather> cityWeathers)
@@ -211,12 +219,28 @@ namespace ApkaPogodowa2
 
             return i;
         }
-
+        
         private void writeCityWeatherToFile(int i, CityWeather city)
         {
             cityTempToList(city);
+            string folderName = @"c:\WeatherApp";
+            string pathString = System.IO.Path.Combine(folderName, "WeatherData");
+            System.IO.Directory.CreateDirectory(pathString);
+            string fileName = "pogoda.xlsx";
+            pathString = System.IO.Path.Combine(pathString, fileName);
 
-            var file = new FileInfo(@"c:\c#\pogoda.xlsx");
+            if (!System.IO.File.Exists(pathString))
+            {
+                
+                    var file2 = new FileInfo(@"c:\WeatherApp\WeatherData\pogoda.xlsx");
+                    using (var package = new ExcelPackage(file2))
+                    {
+                        var sheet = package.Workbook.Worksheets.Add("Weather");
+                    package.Save();
+                }
+                
+            }
+            var file = new FileInfo(@"c:\WeatherApp\WeatherData\pogoda.xlsx");
             using (var package = new ExcelPackage(file))
             {
                 var sheet = package.Workbook.Worksheets[0];
@@ -236,9 +260,9 @@ namespace ApkaPogodowa2
         private void cityTempToList(CityWeather city)
         {
             if (city.TempC < 0)
-            { Dispatcher.Invoke(() => Lista.Items.Add($"{city.TempC} degrees Celsius in {city.Name} \t\t")); }
+            { Dispatcher.Invoke(() => Lista.Items.Add($"{city.TempC} degrees Celsius in {city.Name} \t\t\t")); }
             else
-            { Dispatcher.Invoke(() => Lista.Items.Add($" {city.TempC} degrees Celsius in {city.Name} \t\t")); }
+            { Dispatcher.Invoke(() => Lista.Items.Add($" {city.TempC} degrees Celsius in {city.Name} \t\t\t")); }
         }
         #endregion
 
